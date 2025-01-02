@@ -2,8 +2,8 @@ FROM ros:noetic-ros-base
 
 # install ros2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-noetic-desktop-full \
-    ros-noetic-navigation ros-noetic-nav2d ros-noetic- \
+    ros-noetic-desktop \
+    ros-noetic-navigation ros-noetic-nav2d \
     ros-noetic-slam-toolbox ros-noetic-robot-localization \
     ros-noetic-xacro \
     ros-noetic-teleop-twist-joy ros-noetic-teleop-twist-keyboard \
