@@ -3,12 +3,11 @@
 import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
-from gpiozero import Motor, PWMLED
-from time import sleep
+import RPi.GPIO as GPIO
 
 class L298NMotorDriver:
     def __init__(self):
-        # GPIO pin setup using gpiozero Motor class
+        # GPIO pin setup
         self.motor1_in1 = rospy.get_param('~motor1_in1', 17)  # Default GPIO 17
         self.motor1_in2 = rospy.get_param('~motor1_in2', 27)  # Default GPIO 27
         self.motor1_en = rospy.get_param('~motor1_en', 22)    # Default GPIO 22
@@ -17,13 +16,15 @@ class L298NMotorDriver:
         self.motor2_in2 = rospy.get_param('~motor2_in2', 24)  # Default GPIO 24
         self.motor2_en = rospy.get_param('~motor2_en', 25)    # Default GPIO 25
 
-        # Setup motors using gpiozero Motor and PWMLED classes
-        self.motor1 = Motor(self.motor1_in1, self.motor1_in2)
-        self.motor2 = Motor(self.motor2_in1, self.motor2_in2)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup([self.motor1_in1, self.motor1_in2, self.motor1_en,
+                    self.motor2_in1, self.motor2_in2, self.motor2_en], GPIO.OUT)
 
-        # PWM for motor speed control (gpiozero PWMLED)
-        self.motor1_pwm = PWMLED(self.motor1_en)
-        self.motor2_pwm = PWMLED(self.motor2_en)
+        self.motor1_pwm = GPIO.PWM(self.motor1_en, 100)  # 100 Hz PWM frequency
+        self.motor2_pwm = GPIO.PWM(self.motor2_en, 100)
+
+        self.motor1_pwm.start(0)
+        self.motor2_pwm.start(0)
 
         # ROS setup
         rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback)
@@ -50,28 +51,30 @@ class L298NMotorDriver:
             self.stop()
 
     def set_motor_speeds(self, left_speed, right_speed):
-        self.set_motor_speed(self.motor1, self.motor1_pwm, left_speed)
-        self.set_motor_speed(self.motor2, self.motor2_pwm, right_speed)
+        self.set_motor_speed(self.motor1_in1, self.motor1_in2, self.motor1_pwm, left_speed)
+        self.set_motor_speed(self.motor2_in1, self.motor2_in2, self.motor2_pwm, right_speed)
 
-    def set_motor_speed(self, motor, pwm, speed):
+    def set_motor_speed(self, in1, in2, pwm, speed):
         if speed > 0:
-            motor.forward()
+            GPIO.output(in1, GPIO.HIGH)
+            GPIO.output(in2, GPIO.LOW)
         elif speed < 0:
-            motor.backward()
+            GPIO.output(in1, GPIO.LOW)
+            GPIO.output(in2, GPIO.HIGH)
         else:
-            motor.stop()
+            GPIO.output(in1, GPIO.LOW)
+            GPIO.output(in2, GPIO.LOW)
 
-        # Adjust the PWM (duty cycle) for speed control
-        pwm.value = min(abs(speed), 1.0)
+        pwm.ChangeDutyCycle(min(abs(speed) * 100, 100))
 
     def stop(self):
-        self.motor1.stop()
-        self.motor2.stop()
-        self.motor1_pwm.off()
-        self.motor2_pwm.off()
+        GPIO.output([self.motor1_in1, self.motor1_in2, self.motor2_in1, self.motor2_in2], GPIO.LOW)
+        self.motor1_pwm.ChangeDutyCycle(0)
+        self.motor2_pwm.ChangeDutyCycle(0)
 
     def cleanup(self):
         self.stop()
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     rospy.init_node('l298n_motor_driver', anonymous=True)
