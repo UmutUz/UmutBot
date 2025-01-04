@@ -8,13 +8,13 @@ import RPi.GPIO as GPIO
 class L298NMotorDriver:
     def __init__(self):
         # GPIO pin setup
-        self.motor1_in1 = rospy.get_param('~motor1_in1', 17)  # Default GPIO 17
-        self.motor1_in2 = rospy.get_param('~motor1_in2', 27)  # Default GPIO 27
-        self.motor1_en = rospy.get_param('~motor1_en', 22)    # Default GPIO 22
+        self.motor1_in1 = rospy.get_param('~motor1_in1', 27)  # Default GPIO 17
+        self.motor1_in2 = rospy.get_param('~motor1_in2', 17)  # Default GPIO 27
+        self.motor1_en = rospy.get_param('~motor1_en', 12)    # Default GPIO 22
 
         self.motor2_in1 = rospy.get_param('~motor2_in1', 23)  # Default GPIO 23
         self.motor2_in2 = rospy.get_param('~motor2_in2', 24)  # Default GPIO 24
-        self.motor2_en = rospy.get_param('~motor2_en', 25)    # Default GPIO 25
+        self.motor2_en = rospy.get_param('~motor2_en', 13)    # Default GPIO 25
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup([self.motor1_in1, self.motor1_in2, self.motor1_en,
