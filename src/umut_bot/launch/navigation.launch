@@ -14,7 +14,7 @@
   <param name="angle_compensate"    type="bool"   value="true"/>
   </node>
 
-  <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
+  <!-- <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
     <param name="laser_scan_topic" value="/scan"/>        
     <param name="odom_topic" value="/odom" />             
     <param name="publish_tf" value="true" />                   
@@ -23,7 +23,7 @@
     <param name="init_pose_from_topic" value="/base_pose_ground_truth" /> 
     <param name="freq" value="6.0"/>                         
     <param name="verbose" value="true" />                   
-  </node>
+  </node> -->
 
   <node pkg="umut_bot" type="motor_driver.py" name="motor_driver" output="screen"> </node>
 
