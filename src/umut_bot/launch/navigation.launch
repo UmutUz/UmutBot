@@ -6,7 +6,7 @@
   </node> -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> 
   
-  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="log">
   <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
   <param name="serial_baudrate"     type="int"    value="115200"/>
   <param name="frame_id"            type="string" value="scanner"/>
@@ -27,7 +27,7 @@
 
   <node pkg="umut_bot" type="motor_driver.py" name="motor_driver" output="screen"> </node>
 
-    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="log">
     <param name="base_frame" value="base_link"/>
     <param name="odom_frame" value="odom"/>
     
@@ -69,7 +69,30 @@
     <rosparam file="$(find umut_bot)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find umut_bot)/config/global_costmap_params.yaml" command="load" /> 
     <rosparam file="$(find umut_bot)/config/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find umut_bot)/config/move_base_param.yaml" command="load" />
  </node>
+  <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="log">
+    <param name="laser_scan_topic" value="/scan"/>
+    <param name="odom_topic" value="/odom" />
+    <param name="publish_tf" value="true" />
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom" />
+    <param name="init_pose_from_topic" value="" />
+    <param name="freq" value="5.0"/>
+    <param name="verbose" value="true" />
+  </node>
+
+  <!-- <node pkg="umut_bot" type="encoder_odom.py" name="encoder_odometry_node" output="screen">
+        <param name="encoder_left_pin" value="16"/>
+        <param name="encoder_right_pin" value="26"/>
+        <param name="wheel_radius" value="0.035"/>
+        <param name="wheel_base" value="0.15"/>
+        <param name="ticks_per_revolution" value="20"/>
+    </node>
+
+    <node pkg="umut_bot" type="odom_base.py" name="odom_to_base_node" output="screen">
+    </node> -->
+
  <!-- <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
     <param name="transform_configuration_param" value="param_value" />
  </node> -->

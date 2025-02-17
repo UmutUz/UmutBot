@@ -1,0 +1,7 @@
+<launch>
+    <!-- Start the Pico motor controller node -->
+    <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen">
+        <param name="port" value="/dev/ttyAMA0" />
+        <param name="baud" value="9600" />
+    </node>
+</launch>
