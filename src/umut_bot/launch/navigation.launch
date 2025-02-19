@@ -25,7 +25,7 @@
     <param name="verbose" value="true" />                   
   </node> -->
 
-  <node pkg="umut_bot" type="motor_driver.py" name="motor_driver" output="screen"> </node>
+  <!-- <node pkg="umut_bot" type="motor_driver.py" name="motor_driver" output="screen"> </node> -->
 
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="log">
     <param name="base_frame" value="base_link"/>
@@ -71,7 +71,7 @@
     <rosparam file="$(find umut_bot)/config/base_local_planner_params.yaml" command="load" />
     <rosparam file="$(find umut_bot)/config/move_base_param.yaml" command="load" />
  </node>
-  <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="log">
+  <!-- <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="log">
     <param name="laser_scan_topic" value="/scan"/>
     <param name="odom_topic" value="/odom" />
     <param name="publish_tf" value="true" />
@@ -80,21 +80,25 @@
     <param name="init_pose_from_topic" value="" />
     <param name="freq" value="5.0"/>
     <param name="verbose" value="true" />
-  </node>
+  </node> -->
 
-  <!-- <node pkg="umut_bot" type="encoder_odom.py" name="encoder_odometry_node" output="screen">
+  <node pkg="umut_bot" type="encoder_odom.py" name="encoder_odometry_node" output="screen">
         <param name="encoder_left_pin" value="16"/>
         <param name="encoder_right_pin" value="26"/>
         <param name="wheel_radius" value="0.035"/>
-        <param name="wheel_base" value="0.15"/>
+        <param name="wheel_base" value="0.255"/>
         <param name="ticks_per_revolution" value="20"/>
     </node>
 
-    <node pkg="umut_bot" type="odom_base.py" name="odom_to_base_node" output="screen">
-    </node> -->
+    <!-- <node pkg="umut_bot" type="odom_base.py" name="odom_to_base_node" output="screen">
+    </node>  -->
 
+    <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen">
+        <param name="port" value="/dev/ttyAMA0" />
+        <param name="baud" value="9600" />
+    </node>
  <!-- <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
     <param name="transform_configuration_param" value="param_value" />
- </node> -->
+ </node>-->
 
 </launch> 

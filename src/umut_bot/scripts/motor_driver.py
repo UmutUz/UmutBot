@@ -20,8 +20,8 @@ class L298NMotorDriver:
         GPIO.setup([self.motor1_in1, self.motor1_in2, self.motor1_en,
                     self.motor2_in1, self.motor2_in2, self.motor2_en], GPIO.OUT)
 
-        self.motor1_pwm = GPIO.PWM(self.motor1_en, 100)  # 100 Hz PWM frequency
-        self.motor2_pwm = GPIO.PWM(self.motor2_en, 100)
+        self.motor1_pwm = GPIO.PWM(self.motor1_en, 1000)  # 100 Hz PWM frequency
+        self.motor2_pwm = GPIO.PWM(self.motor2_en, 1000)
 
         self.motor1_pwm.start(0)
         self.motor2_pwm.start(0)
