@@ -8,14 +8,19 @@ from geometry_msgs.msg import Quaternion
 import math
 import time
 
-# Robot Parameters
+# Robot Parameters (defaults; overridden from the ROS param server in odom_publisher)
 WHEEL_RADIUS = 0.0335  # 3.35 cm
 WHEEL_BASE = 0.255  # Distance between wheels (m)
 ENCODER_TICKS_PER_REV = 403  # Encoder resolution
 
-# Variables for odometry calculation
+# Latest cumulative tick count received from the encoder feedback topics
+encoder_latest_1 = 0
+encoder_latest_2 = 0
+
+# Tick count processed on the previous odometry update
 encoder_prev_1 = 0
 encoder_prev_2 = 0
+
 prev_V = 0
 prev_omega = 0
 x = 0.0
@@ -24,12 +29,12 @@ theta = 0.0
 last_time = time.time()
 
 def encoder_callback_1(msg):
-    global encoder_prev_1
-    encoder_prev_1 = msg.data  # Store latest encoder count
+    global encoder_latest_1
+    encoder_latest_1 = msg.data  # Store latest encoder count
 
 def encoder_callback_2(msg):
-    global encoder_prev_2
-    encoder_prev_2 = msg.data  # Store latest encoder count
+    global encoder_latest_2
+    encoder_latest_2 = msg.data  # Store latest encoder count
 
 def calculate_odometry():
     global x, y, theta, encoder_prev_1, encoder_prev_2, last_time, prev_V, prev_omega
@@ -38,11 +43,15 @@ def calculate_odometry():
     dt = current_time - last_time
     last_time = current_time
 
-    # Read current encoder values
-    encoder_current_1 = encoder_prev_1
-    encoder_current_2 = encoder_prev_2
+    # Skip this update if no time elapsed (avoids divide-by-zero)
+    if dt <= 0.0:
+        return x, y, theta, prev_V, prev_omega
 
-    # Compute encoder differences (Δticks)
+    # Read the latest encoder values delivered by the callbacks
+    encoder_current_1 = encoder_latest_1
+    encoder_current_2 = encoder_latest_2
+
+    # Compute encoder differences (Δticks) since the previous update
     delta_ticks_1 = encoder_current_1 - encoder_prev_1
     delta_ticks_2 = encoder_current_2 - encoder_prev_2
 
@@ -84,8 +93,15 @@ def calculate_odometry():
     return x, y, theta, V, omega
 
 def odom_publisher():
+    global WHEEL_RADIUS, WHEEL_BASE, ENCODER_TICKS_PER_REV
+
     rospy.init_node('odom_publisher', anonymous=True)
-    
+
+    # Allow the launch file to override the robot parameters
+    WHEEL_RADIUS = rospy.get_param('~wheel_radius', WHEEL_RADIUS)
+    WHEEL_BASE = rospy.get_param('~wheel_base', WHEEL_BASE)
+    ENCODER_TICKS_PER_REV = rospy.get_param('~ticks_per_revolution', ENCODER_TICKS_PER_REV)
+
     # Subscribe to encoder feedback
     rospy.Subscriber('/encoder_feedback_1', Int32, encoder_callback_1)
     rospy.Subscriber('/encoder_feedback_2', Int32, encoder_callback_2)
@@ -96,7 +112,7 @@ def odom_publisher():
     # Transform broadcaster
     odom_broadcaster = tf.TransformBroadcaster()
 
-    rate = rospy.Rate(100)  # 10 Hz
+    rate = rospy.Rate(100)  # 100 Hz
     while not rospy.is_shutdown():
         x, y, theta, V, omega = calculate_odometry()
 

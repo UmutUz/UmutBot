@@ -29,7 +29,6 @@ src/
     ├── config/              # move_base, costmap and local planner parameters
     ├── launch/
     │   ├── navigation.launch  # Full stack: lidar, gmapping, move_base, encoder odom, ESP32 node
-    │   ├── move_base.launch   # Navigation stack only
     │   ├── pico.launch        # ESP32 motor controller node only
     │   └── rf2o.launch        # rf2o laser odometry (alternative to encoder odom)
     ├── scripts/

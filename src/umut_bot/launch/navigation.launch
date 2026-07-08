@@ -87,7 +87,7 @@
         <param name="encoder_right_pin" value="26"/>
         <param name="wheel_radius" value="0.035"/>
         <param name="wheel_base" value="0.255"/>
-        <param name="ticks_per_revolution" value="20"/>
+        <param name="ticks_per_revolution" value="403"/>
     </node>
 
     <!-- <node pkg="umut_bot" type="odom_base.py" name="odom_to_base_node" output="screen">
