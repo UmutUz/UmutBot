@@ -1,6 +1,6 @@
 # UmutBot
 
-Self-made differential drive robot project to test out my Ender 3 V2 printing capabilities and Raspberry Pi 5 ROS/visualisation limits.
+Self-made differential drive robot project to test out my Ender 3 V2 printing capabilities and Raspberry Pi 5 ROS/visualisation limits. Scrambled together by practically non usable stuff only a student can afford! 
 
 ## Overview
 
