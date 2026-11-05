@@ -1,16 +1,20 @@
 TrajectoryPlannerROS:
-  max_vel_x: 0.8
-  min_vel_x: -0.8
-  min_vel_y: -0.8
-  max_vel_y: 1.0
+  # Limits measured on the bench 2026-11-05: the Nano caps each wheel at
+  # MAX_WHEEL_SPEED = 0.15 m/s (supply sags when both motors run).
+  # Wheel speed = v +- omega * 0.1275, so keep v a bit below 0.15 to leave
+  # room for steering. Raise these after a stronger battery + re-measuring.
+  max_vel_x: 0.12
+  min_vel_x: 0.04      # minimum FORWARD speed (must be positive); reversing only happens via escape_vel
+  min_vel_y: -0.8      # unused: holonomic_robot is false
+  max_vel_y: 1.0       # unused: holonomic_robot is false
 
-  max_vel_theta:  1.0
+  max_vel_theta:  1.0  # in-place: 1.0 * 0.1275 = 0.13 m/s per wheel, fits under 0.15
   min_vel_theta: -1.0
   min_in_place_vel_theta: 0.4
 
   acc_lim_theta: 1
-  acc_lim_x: 5
+  acc_lim_x: 0.4       # wheels reached 0.15 m/s in ~0.4 s on the bench
   acc_lim_y: 2
 
-  escape_vel: -1
+  escape_vel: -0.1     # backing up when stuck; must be negative
   holonomic_robot: false

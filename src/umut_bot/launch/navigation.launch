@@ -1,4 +1,8 @@
 <launch>
+  <!-- RPLIDAR is /dev/ttyUSB0, so the Nano usually shows up as ttyUSB1 (CH340 clone)
+       or ttyACM0. A /dev/serial/by-id/... path is stable across reboots. -->
+  <arg name="nano_port" default="/dev/ttyUSB1" />
+
   <param name="robot_description" textfile="$(find umut_bot)/urdf/umutbot.urdf" />
   <!-- <node pkg="differential_drive" type="diff_tf.py" name="diff_tf">
      <rosparam param="rate">8.0</rosparam>
@@ -93,9 +97,10 @@
     <!-- <node pkg="umut_bot" type="odom_base.py" name="odom_to_base_node" output="screen">
     </node>  -->
 
+    <!-- Arduino Nano motor controller (USB). Override with nano_port:=/dev/ttyXXX -->
     <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen">
-        <param name="port" value="/dev/ttyAMA0" />
-        <param name="baud" value="9600" />
+        <param name="port" value="$(arg nano_port)" />
+        <param name="baud" value="115200" />
     </node>
  <!-- <node pkg="transform_configuration_pkg" type="transform_configuration_type" name="transform_configuration_name" output="screen">
     <param name="transform_configuration_param" value="param_value" />

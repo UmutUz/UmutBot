@@ -1,7 +1,9 @@
 <launch>
-    <!-- Start the Pico motor controller node -->
+    <!-- Arduino Nano motor controller (USB). Override with nano_port:=/dev/ttyXXX -->
+    <arg name="nano_port" default="/dev/ttyUSB1" />
+
     <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen">
-        <param name="port" value="/dev/ttyAMA0" />
-        <param name="baud" value="9600" />
+        <param name="port" value="$(arg nano_port)" />
+        <param name="baud" value="115200" />
     </node>
 </launch>
