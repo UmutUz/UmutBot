@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-tf ros-noetic-tf2 python3-rosdep ros-noetic-diff-drive-controller \
     nano joystick \
     python3-pip \
+    python3-serial \
     ros-noetic-depthai-ros \
     ros-noetic-joint-state-publisher \
     && rm -rf /var/lib/apt/lists/*

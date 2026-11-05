@@ -1,0 +1,16 @@
+# Stable device names for UmutBot's USB serial devices, so the Nano and the
+# RPLIDAR can't swap ttyUSB0/ttyUSB1 between boots.
+#
+# Install on the Raspberry Pi HOST (not inside Docker):
+#   sudo cp 99-umutbot.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# Check:
+#   ls -l /dev/umutbot_nano /dev/rplidar
+#
+# Vendor/product IDs: check with `lsusb` if a link doesn't show up.
+
+# Arduino Nano clone with CH340 USB chip (ID read on Windows: 1a86:7523)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="umutbot_nano"
+
+# RPLIDAR with CP2102 USB-UART adapter (usual ID 10c4:ea60, not verified yet)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="rplidar"

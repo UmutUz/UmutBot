@@ -35,7 +35,7 @@ def parse_encoder_line(raw):
 def main():
     rospy.init_node('pico_motor_controller')
 
-    port = rospy.get_param('~port', '/dev/ttyUSB1')
+    port = rospy.get_param('~port', '/dev/umutbot_nano')
     baud = rospy.get_param('~baud', 115200)
 
     ser = serial.Serial(port, baud, timeout=0.1)

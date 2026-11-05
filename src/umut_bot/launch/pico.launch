@@ -1,8 +1,10 @@
 <launch>
-    <!-- Arduino Nano motor controller (USB). Override with nano_port:=/dev/ttyXXX -->
-    <arg name="nano_port" default="/dev/ttyUSB1" />
+    <!-- Arduino Nano motor controller (USB). /dev/umutbot_nano comes from
+         udev/99-umutbot.rules; without it use nano_port:=/dev/ttyUSB1 -->
+    <arg name="nano_port" default="/dev/umutbot_nano" />
 
-    <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen">
+    <node name="pico_motor_node" pkg="umut_bot" type="pico_ros.py" output="screen"
+          respawn="true" respawn_delay="2">
         <param name="port" value="$(arg nano_port)" />
         <param name="baud" value="115200" />
     </node>

@@ -8,15 +8,15 @@ UmutBot is a ROS Noetic differential drive robot. A Raspberry Pi 5 runs the ROS 
 
 - **SLAM**: gmapping with an RPLIDAR
 - **Navigation**: move_base with costmap + base local planner configs
-- **Odometry**: wheel encoder odometry (rf2o laser odometry available as an alternative)
-- **Motor control**: `/cmd_vel` commands forwarded to the Arduino Nano over USB serial (`/dev/ttyUSB1` by default)
+- **Odometry**: wheel encoder odometry, updated on every Nano report (rf2o laser odometry available as an alternative)
+- **Motor control**: `/cmd_vel` commands forwarded to the Arduino Nano over USB serial (`/dev/umutbot_nano`, see [USB device names](#usb-device-names))
 
 ## Hardware
 
 - Raspberry Pi 5 (main computer)
 - Arduino Nano (motor controller + encoder counting)
 - L298N dual H-bridge motor driver
-- RPLIDAR (on `/dev/ttyUSB0`)
+- RPLIDAR (on `/dev/rplidar`)
 - Differential drive base with wheel encoders (3D printed on an Ender 3 V2)
 
 ### Arduino Nano pinout
@@ -60,10 +60,27 @@ src/
     │   ├── encoder_odom.py    # Computes and publishes wheel odometry from encoder ticks
     │   ├── motor_driver.py    # Direct GPIO motor driver (legacy)
     │   └── odom_base.py       # odom → base_link transform helper
+    ├── udev/                  # udev rule for stable /dev/umutbot_nano and /dev/rplidar names
     └── urdf/                  # Robot description (URDF + xacro)
 ```
 
 ## Running
+
+### USB device names
+
+The Nano and the RPLIDAR are both USB serial devices, so `ttyUSB0`/`ttyUSB1` can swap between boots. Install the udev rule on the Pi host once to get stable names:
+
+```bash
+sudo cp src/umut_bot/udev/99-umutbot.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+ls -l /dev/umutbot_nano /dev/rplidar
+```
+
+If a link is missing, check the vendor/product ID with `lsusb` and fix it in the rule. Without the rule, pass the ports by hand: `roslaunch umut_bot navigation.launch nano_port:=/dev/ttyUSB1 lidar_port:=/dev/ttyUSB0`.
+
+The container needs access to both devices, e.g. `--device=/dev/umutbot_nano --device=/dev/rplidar` (or `-v /dev:/dev --privileged`, which also survives re-plugging).
+
+### Docker + ROS
 
 Build and start the Docker container (ROS Noetic on the Pi 5):
 
