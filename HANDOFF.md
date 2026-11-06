@@ -33,7 +33,7 @@ Stand 2026-11-05. Weitergabe von der Session auf dem Windows-PC an eine Claude-S
    - Danach `ls -l /dev/umutbot_nano /dev/rplidar`.
 3. **Docker-Image neu bauen:** `cd src/dockerfiles && ./docker_container.sh` (Image-Name `noetic`). Danach ist `python3-serial` fest im Image.
    - Das Dockerfile stellt apt auf das letzte Noetic-Snapshot-Repo um. Grund: Noetic ist seit Mai 2025 end-of-life, und der alte Schlüssel von packages.ros.org ist abgelaufen (`apt update` meldet `EXPKEYSIG F42ED6FBAB17C654`).
-   - Die lgpio-Bibliothek wird beim Bauen von GitHub geholt. Ein lokaler `lg/`-Ordner ist nicht mehr nötig.
+   - Keine Pi-GPIO-Bibliotheken mehr im Image (lgpio/rpi-lgpio): Der Nano steuert die Motoren über USB, und lgpio lässt sich unter Ubuntu 20.04 nicht bauen. Ein lokaler `lg/`-Ordner ist nicht nötig.
    - `docker_container.sh` baut das Image nur. Starten z. B. mit `docker run -it --net=host --privileged -v /dev:/dev -v ~/UmutBot:/UmutBot noetic bash`. `--privileged -v /dev:/dev` sorgt dafür, dass der Nano auch nach einem USB-Abbruch erreichbar bleibt.
 4. **Nur die Bridge testen**, Robot dabei aufbocken:
    - `catkin_make && source devel/setup.bash`

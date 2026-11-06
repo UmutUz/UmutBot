@@ -35,15 +35,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-joint-state-publisher \
     && rm -rf /var/lib/apt/lists/*
 
-# lgpio C library, needed by rpi-lgpio below (RPi.GPIO on the Pi 5; only the
-# old motor_driver.py uses it). Cloned at a fixed tag so the build works from
-# a plain git checkout instead of needing a local lg/ folder.
-RUN git clone --depth 1 --branch v0.2.2 https://github.com/joan2937/lg /lg
-WORKDIR /lg
-RUN make && make install
+# No Pi GPIO libraries (lgpio / rpi-lgpio) anymore: the Arduino Nano drives
+# the motors over USB. Only the old motor_driver.py used RPi.GPIO, and it is
+# commented out in navigation.launch. lgpio also doesn't compile here, since
+# Ubuntu focal's kernel headers lack the GPIO v2 API it needs.
 
 # Install required Python package
 RUN pip install --upgrade pip
 RUN pip install --upgrade numpy
-RUN pip install swig
-RUN pip install rpi-lgpio

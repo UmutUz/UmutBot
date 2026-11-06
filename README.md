@@ -90,7 +90,7 @@ cd src/dockerfiles
 docker run -it --net=host --privileged -v /dev:/dev -v ~/UmutBot:/UmutBot noetic bash
 ```
 
-Noetic is end-of-life and the old packages.ros.org signing key has expired, so the Dockerfile switches apt to the final Noetic snapshot repository. It also fetches the lgpio library from GitHub, so the image builds from a plain checkout.
+Noetic is end-of-life and the old packages.ros.org signing key has expired, so the Dockerfile switches apt to the final Noetic snapshot repository. The image has no Pi GPIO libraries, since the Nano drives the motors over USB.
 
 Inside the container, build the workspace and launch the full stack:
 
