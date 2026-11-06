@@ -82,13 +82,15 @@ The container needs access to both devices, e.g. `--device=/dev/umutbot_nano --d
 
 ### Docker + ROS
 
-Build and start the Docker container (ROS Noetic on the Pi 5):
+Build the image (ROS Noetic on the Pi 5), then start a container with the USB devices and the workspace mounted:
 
 ```bash
 cd src/dockerfiles
-docker build -t umutbot .
-./docker_container.sh
+./docker_container.sh    # builds the image "noetic"
+docker run -it --net=host --privileged -v /dev:/dev -v ~/UmutBot:/UmutBot noetic bash
 ```
+
+Noetic is end-of-life and the old packages.ros.org signing key has expired, so the Dockerfile switches apt to the final Noetic snapshot repository. It also fetches the lgpio library from GitHub, so the image builds from a plain checkout.
 
 Inside the container, build the workspace and launch the full stack:
 
