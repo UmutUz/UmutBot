@@ -34,10 +34,16 @@ ALPHA = 0.8
 
 class EncoderOdometry:
     def __init__(self):
+        # Measured with calibrate_odom.py. A radius per wheel, because two
+        # wheels that roll slightly different distances per turn make the
+        # odometry curve while the robot drives straight (or the other way round).
         wheel_radius = rospy.get_param('~wheel_radius', 0.035)
+        left_radius = rospy.get_param('~left_wheel_radius', wheel_radius)
+        right_radius = rospy.get_param('~right_wheel_radius', wheel_radius)
         self.wheel_base = rospy.get_param('~wheel_base', 0.255)
         ticks_per_rev = rospy.get_param('~ticks_per_revolution', 403)
-        self.m_per_tick = 2 * math.pi * wheel_radius / ticks_per_rev
+        self.m_per_tick = (2 * math.pi * left_radius / ticks_per_rev,
+                           2 * math.pi * right_radius / ticks_per_rev)
 
         # Written by the subscriber threads, read by the main loop
         self.lock = threading.Lock()
@@ -87,8 +93,8 @@ class EncoderOdometry:
                           d_left, d_right)
             return False
 
-        ds_left = d_left * self.m_per_tick
-        ds_right = d_right * self.m_per_tick
+        ds_left = d_left * self.m_per_tick[0]
+        ds_right = d_right * self.m_per_tick[1]
         ds = (ds_left + ds_right) / 2.0
         dtheta = (ds_right - ds_left) / self.wheel_base
 

@@ -90,7 +90,10 @@
   <node pkg="umut_bot" type="encoder_odom.py" name="encoder_odometry_node" output="screen">
         <param name="encoder_left_pin" value="16"/>
         <param name="encoder_right_pin" value="26"/>
-        <param name="wheel_radius" value="0.035"/>
+        <!-- Measure with "rosrun umut_bot calibrate_odom.py", keep in sync
+             with the firmware (WHEEL_RADIUS_LEFT/RIGHT, WHEEL_BASE) -->
+        <param name="left_wheel_radius" value="0.035"/>
+        <param name="right_wheel_radius" value="0.035"/>
         <param name="wheel_base" value="0.255"/>
         <param name="ticks_per_revolution" value="403"/>
     </node>

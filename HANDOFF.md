@@ -9,7 +9,8 @@ Stand 2026-11-05. Weitergabe von der Session auf dem Windows-PC an eine Claude-S
   - Pinbelegung: in der README
   - Der Name „pico“ in `pico_ros.py` und `pico.launch` ist ein Überbleibsel und meint den Nano.
 - **Firmware ist geflasht und auf dem Prüfstand getestet:**
-  - Beide Räder fahren vorwärts, beide Encoder zählen positiv. Dafür sind `MOTOR_A_REVERSED` und `ENC2_REVERSED` gesetzt.
+  - Beide Räder fahren vorwärts (Richtung Stützrad, +x in der URDF), beide Encoder zählen dabei positiv. Dafür sind `MOTOR_B_REVERSED` und `ENC1_REVERSED` gesetzt.
+  - Die erste Einstellung vom Prüfstand war genau verkehrt herum: Am Boden fuhr und drehte der Robot falsch, und die Karte verschmierte. Am 2026-11-06 wurden deshalb alle vier Werte umgedreht.
   - Jedes Rad hat einen eigenen Regler (Vorsteuerung + PI) und hält den Sollwert auf etwa ±5–8 %.
   - Stopp nach 500 ms ohne Befehl.
 - **Serielles Protokoll** (115200 Baud, eine Nachricht pro Zeile):
@@ -40,11 +41,12 @@ Stand 2026-11-05. Weitergabe von der Session auf dem Windows-PC an eine Claude-S
    - `roslaunch umut_bot pico.launch`
    - `rostopic hz /encoder_feedback_1` sollte etwa 20 Hz zeigen.
    - Mit `teleop_twist_keyboard` fahren. `repeat_rate` setzen, sonst stoppt der Nano nach 0,5 s.
-5. **Odometrie prüfen** mit `encoder_odom.py` aus `navigation.launch` oder einzeln gestartet:
+5. **Odometrie kalibrieren** mit `rosrun umut_bot calibrate_odom.py` (Bridge muss laufen):
    - `rostopic hz /odom` sollte etwa 20 Hz zeigen.
-   - 1 m geradeaus fahren (Maßband): Steht in `/odom` `x ≈ 1.0`?
-   - Einmal um 360° drehen: Kommt `theta` wieder bei etwa 0 an?
-   - Bei Abweichungen `ticks_per_revolution` (403) bzw. `wheel_radius` (0.035) anpassen, sowohl in `navigation.launch` als auch in der Firmware (`TICKS_PER_REV`, `WHEEL_RADIUS`). Die 403 wurden nie von Hand nachgezählt.
+   - Test 1: Robot etwa 2 m von Hand am Maßband entlang schieben. Von Hand, weil er unter eigenem Antrieb leicht nach rechts zieht. Ergibt den Radius jedes Rads.
+   - Test 2: Mit teleop (`j`/`l`) einige volle Umdrehungen auf der Stelle drehen, bis er wieder an einer Markierung ausgerichtet ist. Ergibt den effektiven Radabstand.
+   - Die ausgegebenen Werte in `navigation.launch` (`left_wheel_radius`, `right_wheel_radius`, `wheel_base`) und in die Firmware (`WHEEL_RADIUS_LEFT`, `WHEEL_RADIUS_RIGHT`, `WHEEL_BASE`) eintragen, dann den Nano neu flashen.
+   - Anlass: Der Scan wanderte in der Karte mit dem Robot mit. Ein erster Drehtest zeigte etwa 279° Odometrie für eine echte halbe Drehung. Die 403 Ticks pro Umdrehung wurden nie von Hand nachgezählt.
 6. **Gesamtsystem starten:** `roslaunch umut_bot navigation.launch`, dann in RViz prüfen, ob die Karte entsteht und move_base Ziele anfährt.
 
 ## Offene Punkte / Hinweise

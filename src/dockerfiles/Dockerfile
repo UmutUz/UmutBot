@@ -35,6 +35,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-joint-state-publisher \
     && rm -rf /var/lib/apt/lists/*
 
+# Foxglove bridge, to view the robot from the PC in Foxglove
+# (ws://raspberrypi:8765). Its own step, so adding it doesn't invalidate the
+# big package layer above and the rebuild stays fast.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-foxglove-bridge \
+    && rm -rf /var/lib/apt/lists/*
+
 # No Pi GPIO libraries (lgpio / rpi-lgpio) anymore: the Arduino Nano drives
 # the motors over USB. Only the old motor_driver.py used RPi.GPIO, and it is
 # commented out in navigation.launch. lgpio also doesn't compile here, since

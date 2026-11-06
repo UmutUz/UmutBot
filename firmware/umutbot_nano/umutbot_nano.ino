@@ -38,18 +38,25 @@ const uint8_t PIN_ENC2_A = 3;   // hardware interrupt INT1
 const uint8_t PIN_ENC2_B = 11;
 
 // ---------------------------------------------------------------- robot
-// Keep these in sync with navigation.launch (encoder_odometry_node params)
-const float WHEEL_RADIUS = 0.035;     // m
-const float WHEEL_BASE = 0.255;       // m
-const float TICKS_PER_REV = 403;      // encoder ticks per wheel revolution
-const float METERS_PER_TICK = 2.0 * PI * WHEEL_RADIUS / TICKS_PER_REV;
+// Keep these in sync with navigation.launch (encoder_odometry_node params).
+// Measure them on the floor with "rosrun umut_bot calibrate_odom.py".
+// One radius per wheel, so the speed controller drives straight even if one
+// wheel rolls a bit further per turn than the other.
+const float WHEEL_RADIUS_LEFT = 0.035;    // m
+const float WHEEL_RADIUS_RIGHT = 0.035;   // m
+const float WHEEL_BASE = 0.255;           // m, effective (measured) value
+const float TICKS_PER_REV = 403;          // encoder ticks per wheel revolution
 
 // Flip these if a wheel spins the wrong way or counts backwards.
-// Goal: driving forward -> both wheels forward AND both counts increase.
-const bool MOTOR_A_REVERSED = true;   // left motor is wired the other way round
-const bool MOTOR_B_REVERSED = false;
-const bool ENC1_REVERSED = false;
-const bool ENC2_REVERSED = true;      // right encoder is mounted mirrored
+// Goal: driving forward (towards the caster wheel, +x in the URDF) -> both
+// wheels forward AND both counts increase. Flip a motor together with its
+// encoder, so the speed controller still sees its own direction correctly.
+// Checked on the floor 2026-11-06: the first bench setting drove and turned
+// the wrong way round, so all four were flipped.
+const bool MOTOR_A_REVERSED = false;
+const bool MOTOR_B_REVERSED = true;
+const bool ENC1_REVERSED = true;
+const bool ENC2_REVERSED = false;
 
 // ---------------------------------------------------------------- tuning
 // Measured 2026-11-05 on the bench: with both motors at PWM 255 the wheels
@@ -78,6 +85,7 @@ struct Wheel {
   bool motorReversed;
   bool encReversed;
   volatile long *ticks;
+  float metersPerTick;
   float target;      // commanded speed, m/s
   float measured;    // speed over the last control period, m/s
   float integral;    // integrator output, PWM
@@ -85,8 +93,10 @@ struct Wheel {
   int pwm;           // last output, -255..255
 };
 
-Wheel left  = {PIN_ENA, PIN_IN1, PIN_IN2, MOTOR_A_REVERSED, ENC1_REVERSED, &enc1Ticks, 0, 0, 0, 0, 0};
-Wheel right = {PIN_ENB, PIN_IN3, PIN_IN4, MOTOR_B_REVERSED, ENC2_REVERSED, &enc2Ticks, 0, 0, 0, 0, 0};
+Wheel left  = {PIN_ENA, PIN_IN1, PIN_IN2, MOTOR_A_REVERSED, ENC1_REVERSED, &enc1Ticks,
+               2.0 * PI * WHEEL_RADIUS_LEFT / TICKS_PER_REV, 0, 0, 0, 0, 0};
+Wheel right = {PIN_ENB, PIN_IN3, PIN_IN4, MOTOR_B_REVERSED, ENC2_REVERSED, &enc2Ticks,
+               2.0 * PI * WHEEL_RADIUS_RIGHT / TICKS_PER_REV, 0, 0, 0, 0, 0};
 
 bool rawPwmMode = false;    // true while a pwm: bench-test command is active
 bool debugOutput = false;
@@ -100,8 +110,8 @@ bool lineOverflow = false;
 
 // ---------------------------------------------------------------- encoders
 // Counting rising edges of phase A only (1x decoding). Phase B gives the
-// direction. If TICKS_PER_REV doesn't match, turn a wheel exactly once by
-// hand and read the count in the serial monitor.
+// direction. To check TICKS_PER_REV, turn a lifted wheel exactly 10 times by
+// hand and compare the count with 10 * TICKS_PER_REV.
 void enc1ISR() {
   if (digitalRead(PIN_ENC1_B)) enc1Ticks--; else enc1Ticks++;
 }
@@ -151,7 +161,7 @@ void setTarget(Wheel &w, float v) {
 
 void updateWheel(Wheel &w, float dt) {
   long t = readTicks(w);
-  w.measured = (t - w.lastTicks) * METERS_PER_TICK / dt;
+  w.measured = (t - w.lastTicks) * w.metersPerTick / dt;
   w.lastTicks = t;
 
   if (rawPwmMode) return;   // bench test: PWM was set directly

@@ -47,7 +47,7 @@ firmware/
 └── umutbot_nano/             # Arduino Nano sketch (motor driver + encoders)
 src/
 ├── dockerfiles/
-│   ├── Dockerfile           # ROS Noetic image with navigation/SLAM packages + lgpio
+│   ├── Dockerfile           # ROS Noetic image with navigation/SLAM packages + Foxglove bridge
 │   └── docker_container.sh  # Container run script
 └── umut_bot/                # Main ROS package
     ├── config/              # move_base, costmap and local planner parameters
@@ -58,6 +58,7 @@ src/
     ├── scripts/
     │   ├── pico_ros.py        # Bridges /cmd_vel to the Nano over serial, publishes encoder feedback
     │   ├── encoder_odom.py    # Computes and publishes wheel odometry from encoder ticks
+    │   ├── calibrate_odom.py  # Measures wheel radii and wheel base on the floor
     │   ├── motor_driver.py    # Direct GPIO motor driver (legacy)
     │   └── odom_base.py       # odom → base_link transform helper
     ├── udev/                  # udev rule for stable /dev/umutbot_nano and /dev/rplidar names
@@ -101,6 +102,26 @@ roslaunch umut_bot navigation.launch
 ```
 
 This starts the RPLIDAR node, gmapping SLAM, move_base, encoder odometry, and the Nano motor bridge. Send goals via move_base (e.g. from RViz) or drive manually by publishing to `/cmd_vel` (e.g. `teleop_twist_keyboard`).
+
+To view the robot from another PC, start the Foxglove bridge in a second shell in the container and connect the Foxglove app to `ws://raspberrypi:8765`. The container needs `--net=host` for this.
+
+```bash
+roslaunch foxglove_bridge foxglove_bridge.launch
+```
+
+### Odometry calibration
+
+If the laser scan slides or turns with the robot in the map instead of staying on the walls, the wheel odometry doesn't match the real motion. `calibrate_odom.py` measures the parameters from the raw encoder counts:
+
+```bash
+roslaunch umut_bot pico.launch          # or navigation.launch
+rosrun umut_bot calibrate_odom.py       # in a second shell
+```
+
+1. **Straight line:** push the robot by hand about 2 m along a tape measure and type in the distance. Pushing keeps it straight even if it drifts under its own power. Gives the radius of each wheel.
+2. **Turning on the spot:** turn it with `teleop_twist_keyboard` (`j`/`l`) by a few full turns until it lines up with a mark again, and type in the number of turns. Gives the effective wheel base.
+
+The script prints the values for `navigation.launch` (`encoder_odometry_node`) and for the firmware (`WHEEL_RADIUS_LEFT`, `WHEEL_RADIUS_RIGHT`, `WHEEL_BASE`). Flash the Nano again after changing the firmware.
 
 ## License
 
